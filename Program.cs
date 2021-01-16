@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace WireSplitter
 {
@@ -41,28 +42,42 @@ namespace WireSplitter
                         string[] g = { "03" };
                         var a = l.Substring((l.IndexOf(",") + 1));
                         a = a.Substring(0, a.IndexOf(","));
+                        var b = l.Substring((l.IndexOf(",") + 1));
+                        b = b.Substring((b.IndexOf(",") + 1));
+                        var c = b.Substring((b.IndexOf(",") + 1));
+                        c = c.Substring(0, c.IndexOf("/"));
+                        b = b.Substring(0, b.IndexOf(","));
                         w.c = l + Environment.NewLine;
                         for(int i = 1; i < p + 1; i++)
                         {
                             File.AppendAllText(s + @"\split_wire" + i + @".dat", w.c);
+                            int e = Count((s + @"\split_wire" + i + @".dat"), g);
+                            int d = Count((s + @"\split_wire" + i + @".dat"), h);
                             Replace(a, ts[i - 1], (s + @"\split_wire" + i + @".dat"));
+                            Replace(b, e.ToString(), (s + @"\split_wire" + i + @".dat")); 
+                            Replace(c, d.ToString(), (s + @"\split_wire" + i + @".dat")); 
                         }
-                        //todo: number of accounts, all 03 records
-                        //todo: number of records, all 02, 03, 16, 49, 88, and 98 records
                     } else if(l.Substring(0,2) == "99") //file trailer
                     {
                         string[] h = { "01", "02", "03", "16", "49", "98", "99" };
                         string[] g = { "02" };
                         var a = l.Substring((l.IndexOf(",") + 1));
                         a = a.Substring(0, a.IndexOf(","));
+                        var b = l.Substring((l.IndexOf(",") + 1));
+                        b = b.Substring((b.IndexOf(",") + 1));
+                        var c = b.Substring((b.IndexOf(",") + 1));
+                        c = c.Substring(0, c.IndexOf("/"));
+                        b = b.Substring(0, b.IndexOf(","));
                         w.d = l + Environment.NewLine;
                         for (int i = 1; i < p + 1; i++)
                         {
                             File.AppendAllText(s + @"\split_wire" + i + @".dat", w.d);
+                            int e = Count((s + @"\split_wire" + i + @".dat"), g);
+                            int d = Count((s + @"\split_wire" + i + @".dat"), h) + 1;
                             Replace(a, ts[i -1], (s + @"\split_wire" + i + @".dat"));
+                            Replace(b, e.ToString(), (s + @"\split_wire" + i + @".dat")); 
+                            Replace(c, d.ToString(), (s + @"\split_wire" + i + @".dat")); 
                         }
-                        //todo: number of groups, the number of 02 records in the file
-                        //todo: number of records, total records, including this 99
                     } else if(l.Substring(0,2) == "03") //account identifier & summary status
                     {
                         p++;
@@ -107,7 +122,9 @@ namespace WireSplitter
         {
             string z = File.ReadAllText(file);
             y = y.Replace(".", ""); //get rid of the decimal point...
-            z = z.Replace(x, y);
+            var r = new Regex(@"(?<![\w])" + x + @"(?![\w])", RegexOptions.IgnoreCase);
+            z = Regex.Replace(z, r.ToString(), y);
+            //Console.WriteLine("Finding " + x + " Replacing with " + y);
             File.WriteAllText(file, z);
         }
         static int Count(string file, string[] arr)
@@ -124,6 +141,7 @@ namespace WireSplitter
                     }
                 }
             }
+            //Console.WriteLine("The total called: " + total);
             return total;
         }
     }
